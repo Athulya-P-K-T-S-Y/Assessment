@@ -5,7 +5,7 @@ const bip39=require("bip39");
 // Generate a random 12-word mnemonic phrase
 const mnemonic = bip39.generateMnemonic(128);
 
-// // Derive the master private key from the mnemonic phrase
+// Derive the master private key from the mnemonic phrase
  const seed = bip39.mnemonicToSeedSync(mnemonic);
  const masterKey = ethers.utils.HDNode.fromSeed(seed);
 

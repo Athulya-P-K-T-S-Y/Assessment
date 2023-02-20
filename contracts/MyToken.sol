@@ -10,7 +10,7 @@ contract MyToken is ERC20, Ownable {
     mapping(address => bool) private _whitelist; //mapping to keep track of whitelisted addresses
 
     // Defining a modifier to check if an address is whitelisted
-    modifier isWhitelist(address account) {
+    modifier  onlyWhitelisted(address account) {
         require(_whitelist[account], "Address is not whitelisted");
         _;
     }
@@ -21,6 +21,9 @@ contract MyToken is ERC20, Ownable {
         _mint(msg.sender, initialSupply);
     }
 
+    function decimals() public view virtual override returns (uint8) {
+        return 6;
+    }
     //Function for the contract owner to add an address to the whitelist
     function addToWhitelist(address account) public onlyOwner {
         _whitelist[account] = true;
@@ -31,9 +34,22 @@ contract MyToken is ERC20, Ownable {
         _whitelist[account] = false;
     }
 
+    // Function for the contract owner to update the whitelisted addresses list
+    function updateWhitelistedAddresses(address[] memory accounts) public onlyOwner {
+        for (uint i = 0; i < accounts.length; i++) {
+            _whitelist[accounts[i]] = true;
+        }
+    }
+
+    // Function to check if an address is whitelisted
+    function isWhitelist(address account) public view returns (bool) {
+        return _whitelist[account];
+    }
+
     // Override the transfer function from ERC20 to check if the recipient address is whitelisted
-    function transfer(address recipient, uint256 amount) public virtual override isWhitelist(recipient) returns (bool) {
+    function transfer(address recipient, uint256 amount) public virtual override  onlyWhitelisted(recipient) returns (bool) {
         return super.transfer(recipient, amount);
     }
 }
+
 

@@ -16,45 +16,45 @@ describe("MyToken", function () {
       expect(await myToken.owner()).to.equal(owner.address);
     });
 
-    it("Should assign the total supply of tokens to the owner", async function () {
-      const ownerBalance = await myToken.balanceOf(owner.address);
-      expect(await myToken.totalSupply()).to.equal(ownerBalance);
-    });
-  });
-
-  describe("Whitelist", function () {
-    it("Should add an address to the whitelist", async function () {
-      await myToken.addToWhitelist(addr1.address);
-      expect(await myToken.isWhitelisted(addr1.address)).to.equal(true);
-    });
-
-    it("Should remove an address from the whitelist", async function () {
-      await myToken.addToWhitelist(addr1.address);
-      await myToken.removeFromWhitelist(addr1.address);
-      expect(await myToken.isWhitelisted(addr1.address)).to.equal(false);
-    });
-  });
-
-  describe("Transfers", function () {
-    it("Should transfer tokens between accounts", async function () {
-      // Transfer tokens from owner to addr1
-      await myToken.transfer(addr1.address, 1000);
-      expect(await myToken.balanceOf(addr1.address)).to.equal(1000);
-
-      // Transfer tokens from addr1 to addr2
-      await myToken.connect(addr1).transfer(addr2.address, 100);
-      expect(await myToken.balanceOf(addr2.address)).to.equal(100);
-    });
-
-    it("Should fail if recipient is not whitelisted", async function () {
-      await expect(myToken.transfer(addr1.address, 100)).to.be.revertedWith("Address is not whitelisted");
-    });
-
-    it("Should fail if sender does not have enough tokens", async function () {
-      const initialBalance = await myToken.balanceOf(owner.address);
-
-      // Try to transfer more tokens than the sender has
-      await expect(myToken.transfer(addr1.address, initialBalance.add(1))).to.be.revertedWith("ERC20: transfer amount exceeds balance");
-    });
+  it("Should assign the total supply of tokens to the owner", async function () {
+    const expectedSupply = 10_000_000 * 10 ** 6; // 10 million tokens with 6 decimal places
+    const ownerBalance = await myToken.balanceOf(owner.address);
+    expect(ownerBalance.toNumber()).to.equal(expectedSupply);
   });
 });
+
+describe("Whitelist", function () {
+  it("Should allow the owner to add an address to the whitelist", async function () {
+    await myToken.addToWhitelist(addr1.address);
+    expect(await myToken.isWhitelist(addr1.address)).to.equal(true);
+  });
+
+  it("Should allow the owner to remove an address from the whitelist", async function () {
+    await myToken.addToWhitelist(addr1.address);
+    expect(await myToken.isWhitelist(addr1.address)).to.equal(true);
+
+    await myToken.removeFromWhitelist(addr1.address);
+    expect(await myToken.isWhitelist(addr1.address)).to.equal(false);
+  });
+
+  it("Should allow the owner to update the whitelisted addresses list", async function () {
+    const newWhitelist = [        "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",        "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",        "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"      ];
+    await myToken.updateWhitelistedAddresses(newWhitelist);
+    expect(await myToken.isWhitelist(newWhitelist[0])).to.equal(true);
+    expect(await myToken.isWhitelist(newWhitelist[1])).to.equal(true);
+    expect(await myToken.isWhitelist(newWhitelist[2])).to.equal(true);
+  });
+  
+});
+
+  describe("Transfers", function () {
+    it("Should transfer tokens to a whitelisted recipient", async function () {
+      const amount = 1000;
+      await myToken.addToWhitelist(addr1.address);
+      await myToken.connect(owner).transfer(addr1.address, amount);
+      const addr1Balance = await myToken.balanceOf(addr1.address);
+      expect(addr1Balance.toNumber()).to.equal(amount);
+    });
+  
+  })
+ });

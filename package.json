@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.2",
     "bip39": "^3.0.4",
     "dotenv": "^16.0.3",
     "web3": "^1.8.2"
